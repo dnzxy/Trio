@@ -169987,6 +169987,9 @@
         }
       }
     },
+    "Includes everything this device reported to Trio in the last 3 days. Low-level Bluetooth traces cover the current app session only." : {
+
+    },
     "Increase sensitivity when glucose is above target if a manual Temp Target > %@ %@ is set." : {
       "localizations" : {
         "bg" : {
@@ -268360,6 +268363,9 @@
           }
         }
       }
+    },
+    "Share Pump Logs" : {
+
     },
     "Shared Secret" : {
       "localizations" : {
