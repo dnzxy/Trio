@@ -9,6 +9,7 @@ final class AppLogStore: LogSink, @unchecked Sendable {
     static let bufferLimit = 5000
     static let batchSize = 200
     static let flushDelay: TimeInterval = 2
+    static let purgeInterval: TimeInterval = 24 * 60 * 60
     static let legacyFileMaxAge: TimeInterval = 7 * 24 * 60 * 60
 
     private static let entityName = "AppLogEntry"
@@ -17,6 +18,7 @@ final class AppLogStore: LogSink, @unchecked Sendable {
 
     private struct Pending: Sendable {
         var records: [LogRecord] = []
+        var persistsDebug: Bool
         var flushScheduled = false
         var batchFlushScheduled = false
     }
@@ -24,7 +26,7 @@ final class AppLogStore: LogSink, @unchecked Sendable {
     let storageURL: URL
     var directory: URL { storageURL.deletingLastPathComponent() }
 
-    private let pending = OSAllocatedUnfairLock(initialState: Pending())
+    private let pending: OSAllocatedUnfairLock<Pending>
     private let queue = DispatchQueue(label: "AppLogStore.queue", qos: .utility)
     private let notificationCenter: Foundation.NotificationCenter
     private let loadContainer: (URL) -> NSPersistentContainer?
@@ -34,19 +36,24 @@ final class AppLogStore: LogSink, @unchecked Sendable {
     // Confined to `queue`
     private var container: NSPersistentContainer?
     private var context: NSManagedObjectContext?
+    private var policy: LogRetentionPolicy
+    private var lastPurge: Date?
     private var isCheckingProtectedData = false
     private var didMoveStoreAside = false
 
     init(
         storageURL: URL = AppLogStore.defaultStorageURL,
+        policy: LogRetentionPolicy = .default,
         notificationCenter: Foundation.NotificationCenter = .default,
         loadContainer: @escaping (URL) -> NSPersistentContainer? = AppLogStore.loadContainer,
         isProtectedDataAvailable: @escaping @MainActor () -> Bool = { UIApplication.shared.isProtectedDataAvailable }
     ) {
         self.storageURL = storageURL
+        self.policy = policy
         self.notificationCenter = notificationCenter
         self.loadContainer = loadContainer
         self.isProtectedDataAvailable = isProtectedDataAvailable
+        pending = OSAllocatedUnfairLock(initialState: Pending(persistsDebug: policy.persistsDebug))
 
         observers = [
             notificationCenter.addObserver(
@@ -91,6 +98,7 @@ final class AppLogStore: LogSink, @unchecked Sendable {
 
     func accept(_ record: LogRecord) {
         let (scheduleDelayed, flushNow) = pending.withLock { state -> (Bool, Bool) in
+            guard record.level != .debug || state.persistsDebug else { return (false, false) }
             state.records.append(record)
             if state.records.count > Self.bufferLimit {
                 // Drop a chunk so a full buffer doesn't shift on every record
@@ -131,6 +139,20 @@ final class AppLogStore: LogSink, @unchecked Sendable {
         }
     }
 
+    func apply(_ policy: LogRetentionPolicy) {
+        pending.withLock { $0.persistsDebug = policy.persistsDebug }
+        queue.async {
+            guard self.policy != policy else { return }
+            self.policy = policy
+            self.purge()
+        }
+    }
+
+    func observeSettings(of settingsManager: SettingsManager, broadcaster: Broadcaster) {
+        apply(LogRetentionPolicy(settings: settingsManager.settings))
+        broadcaster.register(SettingsObserver.self, observer: self)
+    }
+
     private func flushPending() {
         guard let context else { return }
         let batch = pending.withLock { state -> [LogRecord] in
@@ -143,6 +165,8 @@ final class AppLogStore: LogSink, @unchecked Sendable {
         if !batch.isEmpty {
             insert(batch, into: context)
         }
+        if let lastPurge, Date().timeIntervalSince(lastPurge) < Self.purgeInterval { return }
+        purge()
     }
 
     private func insert(_ batch: [LogRecord], into context: NSManagedObjectContext) {
@@ -201,6 +225,36 @@ final class AppLogStore: LogSink, @unchecked Sendable {
                     launchID: row["launchID"] as? UUID ?? UUID()
                 )
             }
+        }
+    }
+
+    private func purge() {
+        guard let context else { return }
+        lastPurge = Date()
+        let maxAge = policy.maxAge
+        let maxRows = policy.maxRows
+        context.performAndWait {
+            deleteEntries(before: Date().addingTimeInterval(-maxAge), in: context)
+
+            let newest = NSFetchRequest<NSDictionary>(entityName: Self.entityName)
+            newest.resultType = .dictionaryResultType
+            newest.propertiesToFetch = ["timestamp"]
+            newest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
+            newest.fetchOffset = max(0, maxRows - 1)
+            newest.fetchLimit = 1
+            if let cutoff = (try? context.fetch(newest))?.first?["timestamp"] as? Date {
+                deleteEntries(before: cutoff, in: context)
+            }
+        }
+    }
+
+    private func deleteEntries(before date: Date, in context: NSManagedObjectContext) {
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: Self.entityName)
+        request.predicate = NSPredicate(format: "timestamp < %@", date as NSDate)
+        do {
+            try context.execute(NSBatchDeleteRequest(fetchRequest: request))
+        } catch {
+            Logger.Category.coreData.osLogger.error("App log purge failed: \(String(describing: error), privacy: .public)")
         }
     }
 
@@ -287,5 +341,21 @@ final class AppLogStore: LogSink, @unchecked Sendable {
             return nil
         }
         return container
+    }
+}
+
+extension AppLogStore: SettingsObserver {
+    func settingsDidChange(_ settings: TrioSettings) {
+        apply(LogRetentionPolicy(settings: settings))
+    }
+}
+
+extension LogRetentionPolicy {
+    init(settings: TrioSettings) {
+        self.init(
+            maxAge: TimeInterval(max(1, settings.logRetentionDays)) * 24 * 60 * 60,
+            persistsDebug: settings.logVerboseEnabled,
+            maxRows: LogRetentionPolicy.default.maxRows
+        )
     }
 }
