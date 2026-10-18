@@ -267966,6 +267966,9 @@
         }
       }
     },
+    "Share CGM Logs" : {
+
+    },
     "Share logs" : {
       "comment" : "2 log files to share",
       "extractionState" : "manual",
