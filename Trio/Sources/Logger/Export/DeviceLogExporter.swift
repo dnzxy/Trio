@@ -38,6 +38,10 @@ final class DeviceLogExporter: DeviceLogExporting, Injectable {
 
     func export(_ request: DeviceLogExportRequest, into directory: URL) async throws {
         try await exportDeviceLogs(request, into: directory)
+        if request.includeOSLog {
+            let since = max(request.window.start, OSLogCapture.processStartDate ?? request.window.start)
+            OSLogCapture.write(subsystems: KnownLogSubsystems.all, since: since, into: directory)
+        }
         if request.includeKitFiles {
             copyKitFiles(into: directory)
         }
