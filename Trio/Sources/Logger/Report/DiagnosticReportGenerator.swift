@@ -171,6 +171,7 @@ final class DiagnosticReportGenerator: Injectable {
                 cgmManager: { fetchGlucoseManager?.cgmManager }
             ),
             AlertsSection(),
+            DeterminationsSection(),
             LoopTimingSection(),
             NightscoutSection(settingsManager: settingsManager, keychain: keychain, reachabilityManager: reachabilityManager),
             WatchSection(),
