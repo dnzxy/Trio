@@ -2,6 +2,7 @@ import CGMBLEKit
 import CryptoKit
 import Foundation
 import G7SensorKit
+import GlookoServiceKit
 import LibreTransmitter
 import LoopKit
 import SyaiKit
@@ -130,6 +131,12 @@ struct SensitiveValues {
         add(session.refreshToken, .secret)
         add(session.username, .email)
         add(session.userId, .account)
+    }
+
+    mutating func add(glooko service: GlookoService?) {
+        guard let service else { return }
+        add(service.token, .secret)
+        add(service.configuration.email, .email)
     }
 
     mutating func add(_ manager: DeviceManager) {

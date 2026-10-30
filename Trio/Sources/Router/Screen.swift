@@ -9,6 +9,7 @@ enum Screen: Identifiable, Hashable {
     case nighscoutConfig
     case nighscoutConfigDirect
     case tidepoolConfig
+    case glookoConfig
     case pumpConfig
     case pumpConfigDirect
     case basalProfileEditor
@@ -73,6 +74,8 @@ extension Screen {
             NightscoutConfig.RootView(resolver: resolver, displayClose: true)
         case .tidepoolConfig:
             TidepoolStartView(resolver: resolver, state: Settings.StateModel())
+        case .glookoConfig:
+            GlookoStartView(resolver: resolver, state: Settings.StateModel())
         case .pumpConfig:
             PumpConfig.RootView(
                 resolver: resolver,

@@ -273,7 +273,20 @@ private final class StubTidepoolManager: TidepoolManager {
     func forceTidepoolDataUpload() {}
 }
 
-/// Keeps meal mutation tests off the Nightscout, Apple Health and Tidepool accounts configured in the host app.
+private final class StubGlookoManager: GlookoManager {
+    let glookoUploadIssue = CurrentValueSubject<GlookoUploadIssue?, Never>(nil)
+    func addGlookoService(service _: Service) {}
+    func getGlookoServiceUI() -> ServiceUI? { nil }
+    func getGlookoPluginHost() -> PluginHost? { nil }
+    func uploadCarbs() async {}
+    func deleteCarbs(withSyncId _: UUID, carbs _: Decimal, at _: Date, enteredBy _: String) {}
+    func uploadInsulin() async {}
+    func deleteInsulin(withSyncId _: String, amount _: Decimal, at _: Date) {}
+    func uploadGlucose() async {}
+    func forceGlookoDataUpload() {}
+}
+
+/// Keeps meal mutation tests off the Nightscout, Apple Health, Tidepool and Glooko accounts configured in the host app.
 private final class RemoteServicesStubAssembly: Assembly {
     private let nightscout: StubNightscoutManager
 
@@ -285,5 +298,6 @@ private final class RemoteServicesStubAssembly: Assembly {
         container.register(NightscoutManager.self) { _ in self.nightscout }.inObjectScope(.container)
         container.register(HealthKitManager.self) { _ in StubHealthKitManager() }.inObjectScope(.container)
         container.register(TidepoolManager.self) { _ in StubTidepoolManager() }.inObjectScope(.container)
+        container.register(GlookoManager.self) { _ in StubGlookoManager() }.inObjectScope(.container)
     }
 }

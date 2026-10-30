@@ -24,6 +24,7 @@ extension PumpEventStored {
             event.isUploadedToNS = false
             event.isUploadedToHealth = false
             event.isUploadedToTidepool = false
+            event.isUploadedToGlooko = false
 
             // Add a bolus
             let bolus = BolusStored(context: context)
@@ -151,6 +152,15 @@ extension NSPredicate {
         let date = Date.oneDayAgo
         return NSPredicate(
             format: "timestamp >= %@ AND isUploadedToTidepool == %@ AND \(notScheduledBasal) AND \(notMutable)",
+            date as NSDate,
+            false as NSNumber
+        )
+    }
+
+    static var pumpEventsNotYetUploadedToGlooko: NSPredicate {
+        let date = Date.oneDayAgo
+        return NSPredicate(
+            format: "timestamp >= %@ AND isUploadedToGlooko == %@ AND \(notScheduledBasal) AND \(notMutable)",
             date as NSDate,
             false as NSNumber
         )

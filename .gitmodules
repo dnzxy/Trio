@@ -52,3 +52,6 @@
 [submodule "SyaiKit"]
 	path = SyaiKit
 	url = https://github.com/nightscout/SyaiKit
+[submodule "GlookoServiceKit"]
+	path = GlookoServiceKit
+	url = https://github.com/nightscout/GlookoServiceKit.git

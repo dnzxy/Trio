@@ -15,6 +15,7 @@
         <attribute name="fpuID" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="isFPU" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="isUploadedToGlooko" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isUploadedToHealth" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isUploadedToNS" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isUploadedToTidepool" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
@@ -80,6 +81,7 @@
         <attribute name="glucose" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="isManual" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="isUploadedToGlooko" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isUploadedToHealth" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isUploadedToNS" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isUploadedToTidepool" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
@@ -207,6 +209,7 @@
         <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="insulinType" optional="YES" attributeType="String"/>
         <attribute name="isMutable" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="isUploadedToGlooko" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isUploadedToHealth" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isUploadedToNS" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isUploadedToTidepool" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>

@@ -44,6 +44,10 @@ extension Alert {
         case notLooping
         case algorithmError
         case glucoseDataStale
+        // Service concepts. Surface through `TrioAlertManager` via
+        // `GlookoManager.issueAlert(_:)`.
+        case glookoLoginRequired
+        case glookoUploadsFailing
         /// Plugin-unique alarm that doesn't merge with anything else.
         case unspecified
 
@@ -81,6 +85,8 @@ extension Alert {
             case .notLooping: return String(localized: "Trio Not Looping")
             case .algorithmError: return String(localized: "Algorithm Error")
             case .glucoseDataStale: return String(localized: "Glucose Data Stale")
+            case .glookoLoginRequired: return String(localized: "Glooko Login Required")
+            case .glookoUploadsFailing: return String(localized: "Glooko Uploads Failing")
             case .unspecified: return ""
             }
         }

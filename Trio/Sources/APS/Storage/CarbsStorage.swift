@@ -22,6 +22,7 @@ protocol CarbsStorage {
     func getFPUsNotYetUploadedToNightscout() async throws -> [NightscoutTreatment]
     func getCarbsNotYetUploadedToHealth() async throws -> [CarbsEntry]
     func getCarbsNotYetUploadedToTidepool() async throws -> [CarbsEntry]
+    func getCarbsNotYetUploadedToGlooko() async throws -> [CarbsEntry]
     /// Resolves a meal root by its own `id` or by the family's `fpuID`, which is the Nightscout `id` of every carb equivalent.
     func fetchMealRoot(handle: UUID) async throws -> (objectID: NSManagedObjectID, snapshot: MealSnapshot)?
 }
@@ -321,6 +322,7 @@ final class BaseCarbsStorage: CarbsStorage, Injectable {
         newItem.isUploadedToNS = areFetchedFromRemote ? true : false
         newItem.isUploadedToHealth = false
         newItem.isUploadedToTidepool = false
+        newItem.isUploadedToGlooko = false
 
         if entry.fat != nil, entry.protein != nil, let fpuId = entry.fpuID {
             newItem.fpuID = UUID(uuidString: fpuId)
@@ -336,7 +338,7 @@ final class BaseCarbsStorage: CarbsStorage, Injectable {
         newItem.fpuID = entry.fpuID.flatMap(UUID.init(uuidString:))
         newItem.isFPU = true
         newItem.isUploadedToNS = false
-        // do NOT set Health and Tidepool flags to ensure they will NOT be uploaded
+        // do NOT set Health, Tidepool and Glooko flags to ensure they will NOT be uploaded
     }
 
     /// Replaces a stored meal, together with any carb equivalents sharing its `fpuID`.
@@ -413,7 +415,7 @@ final class BaseCarbsStorage: CarbsStorage, Injectable {
                 carbEntry.fpuID = commonFPUID
                 carbEntry.isFPU = true
                 carbEntry.isUploadedToNS = areFetchedFromRemote ? true : false
-                // do NOT set Health and Tidepool flags to ensure they will NOT be uploaded
+                // do NOT set Health, Tidepool and Glooko flags to ensure they will NOT be uploaded
                 return false // return false to continue
             }
             do {
@@ -712,12 +714,26 @@ final class BaseCarbsStorage: CarbsStorage, Injectable {
     }
 
     func getCarbsNotYetUploadedToTidepool() async throws -> [CarbsEntry] {
+        try await getCarbsNotYetUploaded(
+            predicate: NSPredicate.carbsNotYetUploadedToTidepool,
+            contextName: "getCarbsNotYetUploadedToTidepool"
+        )
+    }
+
+    func getCarbsNotYetUploadedToGlooko() async throws -> [CarbsEntry] {
+        try await getCarbsNotYetUploaded(
+            predicate: NSPredicate.carbsNotYetUploadedToGlooko,
+            contextName: "getCarbsNotYetUploadedToGlooko"
+        )
+    }
+
+    private func getCarbsNotYetUploaded(predicate: NSPredicate, contextName: String) async throws -> [CarbsEntry] {
         let context = makeContext()
-        context.name = "getCarbsNotYetUploadedToTidepool"
+        context.name = contextName
         let results = try await CoreDataStack.shared.fetchEntitiesAsync(
             ofType: CarbEntryStored.self,
             onContext: context,
-            predicate: NSPredicate.carbsNotYetUploadedToTidepool,
+            predicate: predicate,
             key: "date",
             ascending: false
         )

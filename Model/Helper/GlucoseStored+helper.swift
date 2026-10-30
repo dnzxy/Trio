@@ -34,6 +34,7 @@ extension GlucoseStored {
             glucose.isUploadedToNS = false
             glucose.isUploadedToHealth = false
             glucose.isUploadedToTidepool = false
+            glucose.isUploadedToGlooko = false
             return glucose
         }
 
@@ -114,6 +115,16 @@ extension NSPredicate {
             date as NSDate,
             false as NSNumber,
             true as NSNumber
+        )
+    }
+
+    static func glucoseNotYetUploadedToGlooko(isManual: Bool) -> NSPredicate {
+        let date = Date.oneDayAgo
+        return NSPredicate(
+            format: "date >= %@ AND isUploadedToGlooko == %@ AND isManual == %@",
+            date as NSDate,
+            false as NSNumber,
+            isManual as NSNumber
         )
     }
 }

@@ -70,6 +70,7 @@ enum Logger {
         case treatments
         case nightscout
         case tidepool
+        case glooko
         case remote
         case healthKit
         case alerts

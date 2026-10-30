@@ -1,5 +1,6 @@
 import CoreData
 import Foundation
+import GlookoServiceKit
 import LoopKit
 import OSLog
 import Swinject
@@ -19,6 +20,7 @@ final class LogExport: Injectable {
     @Injected() private var settingsManager: SettingsManager!
     @Injected() private var keychain: Keychain!
     @Injected() private var tidepoolManager: TidepoolManager!
+    @Injected() private var glookoManager: GlookoManager!
 
     // Read-only view of BaseAlertHistoryStorage's persisted history
     static let alertHistoryKey = "openaps.monitor.alertHistory.data"
@@ -287,6 +289,7 @@ final class LogExport: Injectable {
             values.addTrioIdentifiers()
         }
         values.add(tidepool: tidepoolManager?.getTidepoolServiceUI() as? TidepoolService)
+        values.add(glooko: glookoManager?.getGlookoServiceUI() as? GlookoService)
         let (pump, cgm) = currentManagers()
         for manager in [pump, cgm].compactMap({ $0 }) {
             values.add(manager)

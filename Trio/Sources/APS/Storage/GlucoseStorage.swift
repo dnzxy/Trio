@@ -24,6 +24,7 @@ protocol GlucoseStorage {
     func getManualGlucoseNotYetUploadedToHealth() async throws -> [BloodGlucose]
     func getGlucoseNotYetUploadedToTidepool() async throws -> [StoredGlucoseSample]
     func getManualGlucoseNotYetUploadedToTidepool() async throws -> [StoredGlucoseSample]
+    func getGlucoseNotYetUploadedToGlooko() async throws -> [StoredGlucoseSample]
 //    func getGlucoseStatus() async throws -> GlucoseStatus? // FIXME: prepared for later use
     var alarm: GlucoseAlarm? { get }
     func deleteGlucose(_ treatmentObjectID: NSManagedObjectID) async
@@ -260,6 +261,7 @@ final class BaseGlucoseStorage: GlucoseStorage, Injectable {
         entry.isUploadedToNS = false
         entry.isUploadedToHealth = false
         entry.isUploadedToTidepool = false
+        entry.isUploadedToGlooko = false
     }
 
     private func storeCGMState(_ glucose: [BloodGlucose]) {
@@ -341,6 +343,7 @@ final class BaseGlucoseStorage: GlucoseStorage, Injectable {
             newItem.isUploadedToNS = false
             newItem.isUploadedToHealth = false
             newItem.isUploadedToTidepool = false
+            newItem.isUploadedToGlooko = false
 
             do {
                 guard context.hasChanges else { return }
@@ -676,49 +679,50 @@ final class BaseGlucoseStorage: GlucoseStorage, Injectable {
     // Fetch glucose that is not uploaded to Tidepool yet
     /// - Returns: Array of StoredGlucoseSample to ensure the correct format for Tidepool upload
     func getGlucoseNotYetUploadedToTidepool() async throws -> [StoredGlucoseSample] {
-        let context = makeContext()
-        context.name = "getGlucoseNotYetUploadedToTidepool"
-
-        let results = try await CoreDataStack.shared.fetchEntitiesAsync(
-            ofType: GlucoseStored.self,
-            onContext: context,
+        try await getGlucoseNotYetUploaded(
             predicate: NSPredicate.glucoseNotYetUploadedToTidepool,
-            key: "date",
-            ascending: false
+            isManualGlucose: false,
+            contextName: "getGlucoseNotYetUploadedToTidepool"
         )
-
-        return try await context.perform {
-            guard let fetchedResults = results as? [GlucoseStored] else {
-                throw CoreDataError.fetchError(function: #function, file: #file)
-            }
-
-            return fetchedResults.map { result in
-                BloodGlucose(
-                    id: result.id?.uuidString ?? UUID().uuidString,
-                    sgv: Int(result.glucose),
-                    direction: BloodGlucose.Direction(from: result.direction ?? ""),
-                    date: Decimal(result.date?.timeIntervalSince1970 ?? Date().timeIntervalSince1970) * 1000,
-                    dateString: result.date ?? Date(),
-                    unfiltered: Decimal(result.glucose),
-                    filtered: Decimal(result.glucose),
-                    noise: nil,
-                    glucose: Int(result.glucose)
-                )
-            }
-            .map { $0.convertStoredGlucoseSample(isManualGlucose: false) }
-        }
     }
 
     // Fetch manual glucose that is not uploaded to Tidepool yet
     /// - Returns: Array of StoredGlucoseSample to ensure the correct format for the Tidepool upload
     func getManualGlucoseNotYetUploadedToTidepool() async throws -> [StoredGlucoseSample] {
+        try await getGlucoseNotYetUploaded(
+            predicate: NSPredicate.manualGlucoseNotYetUploadedToTidepool,
+            isManualGlucose: true,
+            contextName: "getManualGlucoseNotYetUploadedToTidepool"
+        )
+    }
+
+    /// CGM and manual glucose not yet uploaded to Glooko, each marked by its own `isManual`
+    func getGlucoseNotYetUploadedToGlooko() async throws -> [StoredGlucoseSample] {
+        let cgm = try await getGlucoseNotYetUploaded(
+            predicate: NSPredicate.glucoseNotYetUploadedToGlooko(isManual: false),
+            isManualGlucose: false,
+            contextName: "getGlucoseNotYetUploadedToGlooko"
+        )
+        let manual = try await getGlucoseNotYetUploaded(
+            predicate: NSPredicate.glucoseNotYetUploadedToGlooko(isManual: true),
+            isManualGlucose: true,
+            contextName: "getManualGlucoseNotYetUploadedToGlooko"
+        )
+        return cgm + manual
+    }
+
+    private func getGlucoseNotYetUploaded(
+        predicate: NSPredicate,
+        isManualGlucose: Bool,
+        contextName: String
+    ) async throws -> [StoredGlucoseSample] {
         let context = makeContext()
-        context.name = "getManualGlucoseNotYetUploadedToTidepool"
+        context.name = contextName
 
         let results = try await CoreDataStack.shared.fetchEntitiesAsync(
             ofType: GlucoseStored.self,
             onContext: context,
-            predicate: NSPredicate.manualGlucoseNotYetUploadedToTidepool,
+            predicate: predicate,
             key: "date",
             ascending: false
         )
@@ -740,7 +744,8 @@ final class BaseGlucoseStorage: GlucoseStorage, Injectable {
                     noise: nil,
                     glucose: Int(result.glucose)
                 )
-            }.map { $0.convertStoredGlucoseSample(isManualGlucose: true) }
+            }
+            .map { $0.convertStoredGlucoseSample(isManualGlucose: isManualGlucose) }
         }
     }
 

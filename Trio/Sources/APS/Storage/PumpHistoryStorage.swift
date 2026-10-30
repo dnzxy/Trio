@@ -19,6 +19,7 @@ protocol PumpHistoryStorage {
     func getPumpHistoryNotYetUploadedToNightscout() async throws -> [NightscoutTreatment]
     func getPumpHistoryNotYetUploadedToHealth() async throws -> [PumpHistoryEvent]
     func getPumpHistoryNotYetUploadedToTidepool() async throws -> [PumpHistoryEvent]
+    func getPumpHistoryNotYetUploadedToGlooko() async throws -> [PumpHistoryEvent]
 }
 
 final class BasePumpHistoryStorage: PumpHistoryStorage, Injectable {
@@ -134,6 +135,7 @@ final class BasePumpHistoryStorage: PumpHistoryStorage, Injectable {
                 newPumpEvent.isUploadedToNS = false
                 newPumpEvent.isUploadedToHealth = false
                 newPumpEvent.isUploadedToTidepool = false
+                newPumpEvent.isUploadedToGlooko = false
                 if let dose = event.dose {
                     self.applyInsulinSnapshot(to: newPumpEvent, insulinType: dose.insulinType)
                 }
@@ -319,6 +321,7 @@ final class BasePumpHistoryStorage: PumpHistoryStorage, Injectable {
             newPumpEvent.isUploadedToNS = false
             newPumpEvent.isUploadedToHealth = false
             newPumpEvent.isUploadedToTidepool = false
+            newPumpEvent.isUploadedToGlooko = false
 
             // create bolus entry and specify relationship to pump event
             let newBolusEntry = BolusStored(context: context)
@@ -624,12 +627,26 @@ final class BasePumpHistoryStorage: PumpHistoryStorage, Injectable {
     }
 
     func getPumpHistoryNotYetUploadedToTidepool() async throws -> [PumpHistoryEvent] {
+        try await getPumpHistoryNotYetUploaded(
+            predicate: NSPredicate.pumpEventsNotYetUploadedToTidepool,
+            contextName: "getPumpHistoryNotYetUploadedToTidepool"
+        )
+    }
+
+    func getPumpHistoryNotYetUploadedToGlooko() async throws -> [PumpHistoryEvent] {
+        try await getPumpHistoryNotYetUploaded(
+            predicate: NSPredicate.pumpEventsNotYetUploadedToGlooko,
+            contextName: "getPumpHistoryNotYetUploadedToGlooko"
+        )
+    }
+
+    private func getPumpHistoryNotYetUploaded(predicate: NSPredicate, contextName: String) async throws -> [PumpHistoryEvent] {
         let context = makeContext()
-        context.name = "getPumpHistoryNotYetUploadedToTidepool"
+        context.name = contextName
         let results = try await CoreDataStack.shared.fetchEntitiesAsync(
             ofType: PumpEventStored.self,
             onContext: context,
-            predicate: NSPredicate.pumpEventsNotYetUploadedToTidepool,
+            predicate: predicate,
             key: "timestamp",
             ascending: false,
             relationshipKeyPathsForPrefetching: ["bolus", "tempBasal"]

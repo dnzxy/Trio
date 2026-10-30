@@ -13,6 +13,7 @@ import Testing
         pumpTimeMismatch: Bool = false,
         lastGlucoseDate: Date?,
         maxIOB: Decimal = 10,
+        glookoUploadIssue: GlookoUploadIssue? = nil,
         hasUnacknowledgedReleaseNotes: Bool = false,
         dosingMode: DosingMode = .closed
     ) -> MultiUsePanelState {
@@ -21,6 +22,7 @@ import Testing
             pumpTimeMismatch: pumpTimeMismatch,
             lastGlucoseDate: lastGlucoseDate,
             maxIOB: maxIOB,
+            glookoUploadIssue: glookoUploadIssue,
             hasUnacknowledgedReleaseNotes: hasUnacknowledgedReleaseNotes,
             dosingMode: dosingMode,
             now: now
@@ -102,5 +104,18 @@ import Testing
 
     @Test("Acknowledged release notes fall back to stats") func testAcknowledgedShowsStats() {
         #expect(resolve(lastGlucoseDate: fresh, hasUnacknowledgedReleaseNotes: false) == .stats)
+    }
+
+    @Test("Glooko issues sit between dosing warnings and release notes") func testGlookoUploadIssue() {
+        #expect(resolve(lastGlucoseDate: fresh, glookoUploadIssue: .loginRequired) == .glookoLoginRequired)
+        #expect(resolve(lastGlucoseDate: fresh, glookoUploadIssue: .uploadsFailing) == .glookoUploadsFailing)
+        #expect(resolve(
+            lastGlucoseDate: fresh,
+            glookoUploadIssue: .loginRequired,
+            hasUnacknowledgedReleaseNotes: true
+        ) == .glookoLoginRequired)
+        #expect(resolve(lastGlucoseDate: fresh, maxIOB: 0, glookoUploadIssue: .loginRequired) == .maxIOBZero)
+        #expect(resolve(lastGlucoseDate: stale, glookoUploadIssue: .uploadsFailing) == .cgmStale)
+        #expect(resolve(lastGlucoseDate: fresh, glookoUploadIssue: nil) == .stats)
     }
 }

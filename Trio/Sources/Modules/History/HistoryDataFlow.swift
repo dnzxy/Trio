@@ -90,4 +90,5 @@ protocol HistoryProvider: Provider {
     func deleteGlucoseFromHealth(withSyncID id: String)
     func deleteInsulinFromHealth(withSyncID id: String)
     func deleteInsulinFromTidepool(withSyncId id: String, amount: Decimal, at: Date)
+    func deleteInsulinFromGlooko(withSyncId id: String, amount: Decimal, at: Date)
 }

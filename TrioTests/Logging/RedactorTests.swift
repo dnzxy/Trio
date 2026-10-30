@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import GlookoServiceKit
 import Testing
 
 @testable import Trio
@@ -34,6 +35,19 @@ import Testing
         for (input, expected) in cases {
             #expect(redactor.redact(input) == expected)
         }
+    }
+
+    @Test("Glooko session token and account email are replaced") func glooko() {
+        let service = GlookoService(hostIdentifier: "org.nightscout.Trio", hostVersion: "0.0.0")
+        service.credentialStore = InMemoryCredentialStore()
+        service.token = "synthetic-glooko-session-0001"
+        service.configuration.email = "synthetic.glooko@example.test"
+        let redactor = Self.redactor { $0.add(glooko: service) }
+
+        let output = redactor.redact("Cookie synthetic-glooko-session-0001 for synthetic.glooko@example.test")
+        #expect(!output.contains("synthetic-glooko-session-0001"))
+        #expect(!output.contains("synthetic.glooko@example.test"))
+        #expect(Self.redactor { $0.add(glooko: nil) }.redact("unchanged") == "unchanged")
     }
 
     @Test("Trio's own identifiers are replaced") func trioIdentifiers() throws {

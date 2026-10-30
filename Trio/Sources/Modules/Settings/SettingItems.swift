@@ -431,6 +431,7 @@ enum SettingItems {
             path: ["Services", "Nightscout", "Fetch and Remote Control"]
         ),
         SettingItem(title: "Tidepool", view: .serviceSettings, path: ["Services"]),
+        SettingItem(title: "Glooko", view: .serviceSettings, path: ["Services"]),
         SettingItem(title: "Apple Health", view: .healthkit, path: ["Services"])
     ]
 

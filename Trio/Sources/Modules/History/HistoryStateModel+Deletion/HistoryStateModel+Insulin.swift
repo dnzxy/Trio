@@ -33,7 +33,7 @@ extension History.StateModel {
                 waitForSuggestion = true
             }
 
-            // Delete from remote service(s) (i.e. Nightscout, Apple Health, Tidepool)
+            // Delete from remote service(s) (i.e. Nightscout, Apple Health, Tidepool, Glooko)
             await deleteInsulinFromServices(with: treatmentObjectID)
 
             // Delete from Core Data
@@ -69,6 +69,7 @@ extension History.StateModel {
                     self.provider.deleteInsulinFromNightscout(withID: id)
                     self.provider.deleteInsulinFromHealth(withSyncID: id)
                     self.provider.deleteInsulinFromTidepool(withSyncId: id, amount: bolusAmount as Decimal, at: timestamp)
+                    self.provider.deleteInsulinFromGlooko(withSyncId: id, amount: bolusAmount as Decimal, at: timestamp)
                 }
 
                 taskContext.delete(treatmentToDelete)

@@ -53,6 +53,15 @@ extension NSPredicate {
         )
     }
 
+    static var carbsNotYetUploadedToGlooko: NSPredicate {
+        let date = Date.oneDayAgo
+        return NSPredicate(
+            format: "date >= %@ AND isUploadedToGlooko == %@",
+            date as NSDate,
+            false as NSNumber
+        )
+    }
+
     static var fpusNotYetUploadedToNightscout: NSPredicate {
         let date = Date.oneDayAgo
         return NSPredicate(

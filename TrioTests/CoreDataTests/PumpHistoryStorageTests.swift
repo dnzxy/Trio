@@ -209,6 +209,7 @@ import Testing
         #expect(bolusEvent?.isUploadedToNS == false, "Should not be uploaded to NS")
         #expect(bolusEvent?.isUploadedToHealth == false, "Should not be uploaded to Health")
         #expect(bolusEvent?.isUploadedToTidepool == false, "Should not be uploaded to Tidepool")
+        #expect(bolusEvent?.isUploadedToGlooko == false, "Should not be uploaded to Glooko")
         #expect(bolusEvent?.bolus?.isSMB == true, "Should be a SMB")
         #expect(bolusEvent?.bolus?.isExternal == false, "Should not be external insulin")
 
@@ -223,6 +224,7 @@ import Testing
         #expect(tempBasalEvent?.isUploadedToNS == false, "Should not be uploaded to NS")
         #expect(tempBasalEvent?.isUploadedToHealth == false, "Should not be uploaded to Health")
         #expect(bolusEvent?.isUploadedToTidepool == false, "Should not be uploaded to Tidepool")
+        #expect(bolusEvent?.isUploadedToGlooko == false, "Should not be uploaded to Glooko")
     }
 
     @Test("Test store function for manual boluses") func testStorePumpEventsWithManualBoluses() async throws {
@@ -285,6 +287,7 @@ import Testing
         #expect(fetchedEvent?.isUploadedToNS == false, "Should not be uploaded to NS")
         #expect(fetchedEvent?.isUploadedToHealth == false, "Should not be uploaded to Health")
         #expect(fetchedEvent?.isUploadedToTidepool == false, "Should not be uploaded to Tidepool")
+        #expect(fetchedEvent?.isUploadedToGlooko == false, "Should not be uploaded to Glooko")
     }
 
     @Test("Test duplicates in PumpHistoryStorage") func testDuplicatePumpEvents() async throws {

@@ -20,7 +20,7 @@ enum CarbEntryMutationError: Error, Equatable {
     case invalidReplacementID
 }
 
-/// Deletes and replaces a meal family (root plus FPU carb equivalents) in Core Data, Nightscout, Apple Health and Tidepool.
+/// Deletes and replaces a meal family (root plus FPU carb equivalents) in Core Data, Nightscout, Apple Health, Tidepool and Glooko.
 /// Core Data changes run one mutation at a time and finish before any remote call, so COB never waits on the network.
 /// Remote deletes and uploads are awaited before returning. Callers run `determineBasalSync()` afterwards.
 /// Returned failure messages are Nightscout delete failures; the list is empty when Nightscout succeeded or is not configured.
@@ -36,6 +36,7 @@ final class BaseCarbEntryMutationService: CarbEntryMutationService, Injectable {
     @Injected() private var nightscoutManager: NightscoutManager!
     @Injected() private var healthkitManager: HealthKitManager!
     @Injected() private var tidepoolManager: TidepoolManager!
+    @Injected() private var glookoManager: GlookoManager!
 
     private let makeContext: () -> NSManagedObjectContext
     private let localMutations = MealMutationQueue()
@@ -75,7 +76,8 @@ final class BaseCarbEntryMutationService: CarbEntryMutationService, Injectable {
         async let nightscoutUpload: () = nightscoutManager.uploadCarbs()
         async let healthKitUpload: () = healthkitManager.uploadCarbs()
         async let tidepoolUpload: () = tidepoolManager.uploadCarbs()
-        _ = await [nightscoutUpload, healthKitUpload, tidepoolUpload]
+        async let glookoUpload: () = glookoManager.uploadCarbs()
+        _ = await [nightscoutUpload, healthKitUpload, tidepoolUpload, glookoUpload]
     }
 
     private func snapshotRoot(_ objectID: NSManagedObjectID) async throws -> MealSnapshot {
@@ -127,6 +129,12 @@ final class BaseCarbEntryMutationService: CarbEntryMutationService, Injectable {
             await healthkitManager.deleteMealData(byID: snapshot.id.uuidString, sampleType: sampleType)
         }
         tidepoolManager.deleteCarbs(
+            withSyncId: snapshot.id,
+            carbs: snapshot.carbs,
+            at: snapshot.date,
+            enteredBy: CarbsEntry.local
+        )
+        glookoManager.deleteCarbs(
             withSyncId: snapshot.id,
             carbs: snapshot.carbs,
             at: snapshot.date,

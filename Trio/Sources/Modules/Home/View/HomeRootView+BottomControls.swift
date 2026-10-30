@@ -661,6 +661,7 @@ extension Home.RootView {
             pumpTimeMismatch: state.pumpStatusBadgeImage != nil,
             lastGlucoseDate: state.glucoseFromPersistence.last?.date,
             maxIOB: state.maxIOB,
+            glookoUploadIssue: state.glookoUploadIssue,
             hasUnacknowledgedReleaseNotes: releaseNotesService.hasUnacknowledgedNotes,
             dosingMode: state.dosingMode,
             now: state.timerDate
@@ -756,6 +757,24 @@ extension Home.RootView {
             ) {
                 openMaxIOBSetting()
             }
+        case .glookoLoginRequired:
+            panelBanner(
+                systemImage: "icloud.slash.fill",
+                title: String(localized: "Glooko Login Required"),
+                subtitle: String(localized: "Uploads to Glooko are paused. Tap to log in."),
+                tint: .orange
+            ) {
+                openGlookoSetting()
+            }
+        case .glookoUploadsFailing:
+            panelBanner(
+                systemImage: "exclamationmark.icloud.fill",
+                title: String(localized: "Glooko Uploads Failing"),
+                subtitle: String(localized: "Nothing reached Glooko for over an hour. Tap to review."),
+                tint: .orange
+            ) {
+                openGlookoSetting()
+            }
         case .whatsNew:
             panelBanner(
                 systemImage: "sparkles",
@@ -788,6 +807,11 @@ extension Home.RootView {
     /// The mode picker sits on the Settings root, so there is no sub-screen target to push.
     func openDosingModeSetting() {
         selectedTab = 3
+    }
+
+    func openGlookoSetting() {
+        selectedTab = 3
+        settingsPath.append(SearchResultTarget(screen: .glookoConfig, scrollLabel: "Glooko Integration".localized))
     }
 
     func openMaxIOBSetting() {

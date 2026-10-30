@@ -1,5 +1,6 @@
 import CoreData
 import Foundation
+import GlookoServiceKit
 import LoopKit
 import LoopKitUI
 import SwiftUI
@@ -21,6 +22,8 @@ extension Settings {
         @Published var debugOptions = false
         @Published var serviceUIType: ServiceUI.Type?
         @Published var setupTidepool = false
+        @Published var glookoServiceUIType: ServiceUI.Type?
+        @Published var setupGlooko = false
 
         private(set) var buildNumber = ""
         private(set) var versionNumber = ""
@@ -45,6 +48,7 @@ extension Settings {
             copyrightNotice = Bundle.main.infoDictionary?["NSHumanReadableCopyright"] as? String ?? ""
 
             serviceUIType = TidepoolService.self as? ServiceUI.Type
+            glookoServiceUIType = GlookoService.self as? ServiceUI.Type
         }
 
         var logKinds: [LogExport.Kind] {
@@ -105,7 +109,11 @@ extension Settings.StateModel: SettingsObserver {
 extension Settings.StateModel: ServiceOnboardingDelegate {
     func serviceOnboarding(didCreateService service: Service) {
         info(.settings, "Service \(service.pluginIdentifier) added")
-        provider.tidepoolManager.addTidepoolService(service: service)
+        if service is GlookoService {
+            provider.glookoManager.addGlookoService(service: service)
+        } else {
+            provider.tidepoolManager.addTidepoolService(service: service)
+        }
     }
 
     func serviceOnboarding(didOnboardService service: Service) {
@@ -116,6 +124,11 @@ extension Settings.StateModel: ServiceOnboardingDelegate {
 
 extension Settings.StateModel: CompletionDelegate {
     func completionNotifyingDidComplete(_: CompletionNotifying) {
+        if setupGlooko {
+            setupGlooko = false
+            provider.glookoManager.forceGlookoDataUpload()
+            return
+        }
         setupTidepool = false
         provider.tidepoolManager.forceTidepoolDataUpload()
     }

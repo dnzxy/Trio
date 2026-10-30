@@ -363,6 +363,7 @@ extension BloodGlucose {
         glucoseEntry.isUploadedToNS = true
         glucoseEntry.isUploadedToHealth = true
         glucoseEntry.isUploadedToTidepool = true
+        glucoseEntry.isUploadedToGlooko = true
     }
 }
 
@@ -376,6 +377,7 @@ extension PumpHistoryEvent {
         pumpEntry.isUploadedToNS = true
         pumpEntry.isUploadedToHealth = true
         pumpEntry.isUploadedToTidepool = true
+        pumpEntry.isUploadedToGlooko = true
 
         if type == .bolus {
             guard let amount = amount else {
@@ -482,6 +484,7 @@ extension CarbsEntry: Codable {
         carbEntry.isUploadedToNS = true
         carbEntry.isUploadedToHealth = true
         carbEntry.isUploadedToTidepool = true
+        carbEntry.isUploadedToGlooko = true
     }
 }
 

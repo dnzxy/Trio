@@ -7,6 +7,7 @@ extension History {
         @Injected() var nightscoutManager: NightscoutManager!
         @Injected() var healthkitManager: HealthKitManager!
         @Injected() var tidepoolManager: TidepoolManager!
+        @Injected() var glookoManager: GlookoManager!
 
         func pumpSettings() -> PumpSettings {
             storage.retrieve(OpenAPS.Settings.settings, as: PumpSettings.self)
@@ -44,6 +45,10 @@ extension History {
 
         func deleteInsulinFromTidepool(withSyncId id: String, amount: Decimal, at: Date) {
             tidepoolManager.deleteInsulin(withSyncId: id, amount: amount, at: at)
+        }
+
+        func deleteInsulinFromGlooko(withSyncId id: String, amount: Decimal, at: Date) {
+            glookoManager.deleteInsulin(withSyncId: id, amount: amount, at: at)
         }
     }
 }

@@ -11,6 +11,7 @@ public extension PumpEventStored {
     @NSManaged var insulinType: String?
     @NSManaged var isMutable: Bool
     @NSManaged var isUploadedToNS: Bool
+    @NSManaged var isUploadedToGlooko: Bool
     @NSManaged var isUploadedToHealth: Bool
     @NSManaged var isUploadedToTidepool: Bool
     @NSManaged var note: String?
