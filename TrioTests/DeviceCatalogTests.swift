@@ -12,15 +12,17 @@ import UIKit
 
 @Suite("Device Catalog Tests") struct DeviceCatalogTests {
     /// Persisted `pluginIdentifier` per CGM manager type; LoopKit only exposes it per instance.
+    /// Module-qualified: CGMBLEKit and G6SensorKit both name theirs `G6CGMManager`.
     private static let cgmPluginIdentifiers = [
-        "LibreTransmitterManagerV3": "LibreTransmitterManagerV3",
-        "LibreLoopCGMManager": "LibreLoopCGMManager",
-        "G5CGMManager": "DexG5Transmitter",
-        "G6CGMManager": "DexG6Transmitter",
-        "G7CGMManager": "G7CGMManager",
-        "AccuChekCgmManager": "AccuChek",
-        "EversenseCGMManager": "EversenseKit",
-        "SyaiCGMManager": "SyaiCGMManager"
+        "LibreTransmitter.LibreTransmitterManagerV3": "LibreTransmitterManagerV3",
+        "LibreLoop.LibreLoopCGMManager": "LibreLoopCGMManager",
+        "CGMBLEKit.G5CGMManager": "DexG5Transmitter",
+        "CGMBLEKit.G6CGMManager": "DexG6Transmitter",
+        "G6SensorKit.G6CGMManager": "G6SensorKit",
+        "G7SensorKit.G7CGMManager": "G7CGMManager",
+        "AccuChekKit.AccuChekCgmManager": "AccuChek",
+        "EversenseKit.EversenseCGMManager": "EversenseKit",
+        "SyaiKit.SyaiCGMManager": "SyaiCGMManager"
     ]
 
     // MARK: - Integrity
@@ -83,7 +85,7 @@ import UIKit
         for entry in DeviceCatalog.cgms {
             if entry.managerType != nil {
                 #expect(entry.cgmType == .plugin, "\(entry.name) is manager-backed so it must persist as .plugin")
-                #expect(entry.id == entry.managerType.flatMap { Self.cgmPluginIdentifiers[String(describing: $0)] })
+                #expect(entry.id == entry.managerType.flatMap { Self.cgmPluginIdentifiers[String(reflecting: $0)] })
             } else {
                 #expect(entry.cgmType.rawValue == entry.id, "\(entry.name) id must be its CGMType raw value")
             }
@@ -155,8 +157,7 @@ import UIKit
 
         // Vendored but deliberately not offered in Trio.
         let excludedCGMs: Set<String> = [
-            "DexShareClient", // Dexcom Share: no longer offered
-            "G6SensorKit" // native G6 transport, not wired up in Trio
+            "DexShareClient" // Dexcom Share: no longer offered
         ]
 
         let missingPumps = declared.pumps.subtracting(DeviceCatalog.pumps.map(\.id))
