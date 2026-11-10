@@ -603,6 +603,24 @@ private enum G6Fixture {
         #expect(!manager.state.isInWarmup)
         #expect(manager.inSignalLoss)
     }
+
+    @Test("The clock read after a bond request ends the pairing phase") func bondCompletes() {
+        let manager = NativeG6Manager(state: G6Fixture.state())
+        let session = G6StubSession()
+        manager.transmitterSessionDidRequestBond(session)
+        #expect(manager.connectionPhase == .awaitingPairing)
+        manager.transmitterSession(session, didReadTransmitterTime: Date().addingTimeInterval(-.hours(24)))
+        #expect(manager.connectionPhase == .connected)
+    }
+}
+
+private final class G6StubSession: TransmitterSessioning {
+    let ID = G6Fixture.transmitterID
+    weak var delegate: TransmitterSessionDelegate?
+    var peripheralIdentifier: UUID?
+    func start() {}
+    func stop() {}
+    func retarget(id _: String) {}
 }
 
 // MARK: - Trio integration

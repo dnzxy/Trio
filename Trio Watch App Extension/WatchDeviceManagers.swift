@@ -77,7 +77,7 @@ extension G7CGMManager: WatchReadableCGM {
 extension G6CGMManager: WatchReadableCGM {
     var watchLinkStateText: String? {
         switch connectionPhase {
-        case .awaitingPairing: return String(localized: "Pairing the transmitter: keep Trio open")
+        case .awaitingPairing: return String(localized: "Pairing the transmitter")
         case .searching where !isPaired: return String(localized: "Searching for the transmitter")
         default: return nil
         }
@@ -85,7 +85,6 @@ extension G6CGMManager: WatchReadableCGM {
 
     var watchSensorStateText: String? {
         if state.isSensorFailed { return String(localized: "Sensor failed") }
-        // An expired transmitter still reads the session it is running.
         guard state.sensorStartDate != nil else {
             return state.isTransmitterExpired ? String(localized: "Transmitter expired") : nil
         }
@@ -94,8 +93,7 @@ extension G6CGMManager: WatchReadableCGM {
         return nil
     }
 
-    /// A bond request waits on watchOS's pairing prompt, which shows only with Trio on the screen.
-    var watchNeedsAppInFront: Bool { connectionPhase == .awaitingPairing }
+    var watchNeedsAppInFront: Bool { false }
 
     var watchHasSensorProblem: Bool { watchSensorStateText != nil }
 }
