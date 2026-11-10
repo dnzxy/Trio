@@ -1155,9 +1155,11 @@
 		8813B0159CB74F608F398155 /* GlucoseColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD940BA92CA7585D000830A5 /* GlucoseColorScheme.swift */; };
 		0837687032AA45E78964F162 /* Rounding.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6B7CB12C7B6F0800B75029 /* Rounding.swift */; };
 		6D8C9F25D38C472594698C88 /* G7SensorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B4BA75E2D8DBD690069D5B8 /* G7SensorKit.framework */; };
+		F831F1A9AAF836226D10A9C1 /* G6SensorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F982169B11CCA602150B4E5D /* G6SensorKit.framework */; };
 		4B2E5E56B4A54D5EA8608486 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3818AA4C274C26A300843DB3 /* LoopKit.framework */; };
 		A4CEF7BBB9594AD1A935A000 /* LoopKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3818AA4C274C26A300843DB3 /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1EB5165261AB48C3AB179F12 /* G7SensorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3B4BA75E2D8DBD690069D5B8 /* G7SensorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6ACDF54DFC7E666E691D5852 /* G6SensorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F982169B11CCA602150B4E5D /* G6SensorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E6F95378516C489AAF95C3D0 /* AlgorithmLoggingShim.swift in Sources */ = {isa = PBXBuildFile; fileRef = 003825BBFA684CCFA8DA2929 /* AlgorithmLoggingShim.swift */; };
 /* End PBXBuildFile section */
 
@@ -1283,6 +1285,7 @@
 			files = (
 				A4CEF7BBB9594AD1A935A000 /* LoopKit.framework in Embed Frameworks */,
 				1EB5165261AB48C3AB179F12 /* G7SensorKit.framework in Embed Frameworks */,
+				6ACDF54DFC7E666E691D5852 /* G6SensorKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2493,6 +2496,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6D8C9F25D38C472594698C88 /* G7SensorKit.framework in Frameworks */,
+				F831F1A9AAF836226D10A9C1 /* G6SensorKit.framework in Frameworks */,
 				4B2E5E56B4A54D5EA8608486 /* LoopKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

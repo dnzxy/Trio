@@ -1,3 +1,4 @@
+import G6SensorKit
 import G7SensorKit
 import LoopKit
 
@@ -26,6 +27,7 @@ protocol WatchReadableCGM: CGMManager & DeviceConfigurationSharing {
 /// Keyed by each manager's `pluginIdentifier`, which is what its export carries. Stated, as Trio's device catalog
 /// does: LoopKit exposes it only per instance.
 let watchCGMManagersByIdentifier: [String: any WatchReadableCGM.Type] = [
+    "G6SensorKit": G6CGMManager.self,
     "G7CGMManager": G7CGMManager.self
 ]
 
@@ -70,6 +72,30 @@ extension G7CGMManager: WatchReadableCGM {
         default: return false
         }
     }
+}
+
+extension G6CGMManager: WatchReadableCGM {
+    var watchLinkStateText: String? {
+        switch connectionPhase {
+        case .awaitingPairing: return String(localized: "Pairing the transmitter: keep Trio open")
+        case .searching where !isPaired: return String(localized: "Searching for the transmitter")
+        default: return nil
+        }
+    }
+
+    var watchSensorStateText: String? {
+        if state.isTransmitterExpired { return String(localized: "Transmitter expired") }
+        if state.isSensorFailed { return String(localized: "Sensor failed") }
+        guard state.sensorStartDate != nil else { return nil }
+        if state.isInWarmup { return String(localized: "Sensor warmup") }
+        if let expiration = state.sensorExpirationDate, expiration <= Date() { return String(localized: "Sensor expired") }
+        return nil
+    }
+
+    /// A bond request waits on watchOS's pairing prompt, which shows only with Trio on the screen.
+    var watchNeedsAppInFront: Bool { connectionPhase == .awaitingPairing }
+
+    var watchHasSensorProblem: Bool { watchSensorStateText != nil }
 }
 
 extension DeviceManager {
