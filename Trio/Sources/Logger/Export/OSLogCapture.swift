@@ -22,6 +22,7 @@ enum OSLogCapture {
         "AccuChek": ["com.bastiaanv.AccuChekKit"],
         "DexG5Transmitter": ["com.loopkit.CGMBLEKit"],
         "DexG6Transmitter": ["com.loopkit.CGMBLEKit"],
+        "G6SensorKit": ["org.nightscout.G6SensorKit"],
         "G7CGMManager": ["org.loopkit.G7SensorKit", "org.loopkit.G7SensorKitUI", "org.loopkit.G7SensorPlugin"],
         "LibreTransmitterManagerV3": ["com.loopkit.LibreTransmitter", "com.loopkit.libre"],
         "LibreLoopCGMManager": ["org.loopkit.LibreLoop"],

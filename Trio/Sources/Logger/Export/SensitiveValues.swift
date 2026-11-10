@@ -54,6 +54,7 @@ struct SensitiveValues {
         ],
         "DexG5Transmitter": [(["transmitterID"], .cgmSerial)],
         "DexG6Transmitter": [(["transmitterID"], .cgmSerial)],
+        "G6SensorKit": [(["transmitterID"], .cgmSerial), (["peripheralIdentifier"], .device)],
         "G7CGMManager": [
             (["sensorID"], .cgmSerial),
             (["previousSensor", "sensorID"], .cgmSerial),

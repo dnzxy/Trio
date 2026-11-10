@@ -52,4 +52,7 @@
    <FileRef
       location = "group:SyaiKit/SyaiKit.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:G6SensorKit/G6SensorKit.xcodeproj">
+   </FileRef>
 </Workspace>

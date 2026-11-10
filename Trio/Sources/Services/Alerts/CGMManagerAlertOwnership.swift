@@ -1,4 +1,5 @@
 import CGMBLEKit
+import G6SensorKit
 import G7SensorKit
 import LoopKit
 
@@ -29,7 +30,12 @@ enum CGMManagerAlertOwnership {
         switch manager {
         case is G5CGMManager:
             return OwningApp(name: "Dexcom G5", deepLink: nil)
-        case is G6CGMManager:
+        case is CGMBLEKit.G6CGMManager:
+            return OwningApp(name: "Dexcom G6 / One", deepLink: URL(string: "dexcomg6://"))
+        case let manager as G6SensorKit.G6CGMManager:
+            // Only passive mode has a Dexcom app behind it; direct mode
+            // requires that app to be gone, so nothing else alerts.
+            guard manager.state.passiveModeEnabled else { return nil }
             return OwningApp(name: "Dexcom G6 / One", deepLink: URL(string: "dexcomg6://"))
         case let manager as G7CGMManager:
             // Only an eavesdropped session has a Dexcom app behind it; direct

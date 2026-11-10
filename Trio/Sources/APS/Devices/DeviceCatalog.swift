@@ -6,6 +6,8 @@ import CGMBLEKitUI
 import DanaKit
 import EversenseKit
 import Foundation
+import G6SensorKit
+import G6SensorKitUI
 import G7SensorKit
 import G7SensorKitUI
 import LibreLoop
@@ -370,10 +372,17 @@ extension DeviceCatalog {
         // No G5 icon: CGMBLEKitUI ships only "g6", and reusing it would picture the wrong hardware.
         CGMCatalogEntry(.managed(G5CGMManager.self, id: "DexG5Transmitter"), manufacturer: .dexcom, name: "Dexcom G5"),
         CGMCatalogEntry(
-            .managed(G6CGMManager.self, id: "DexG6Transmitter"),
+            .managed(CGMBLEKit.G6CGMManager.self, id: "DexG6Transmitter"),
             manufacturer: .dexcom,
             name: "Dexcom G6 / ONE",
             icon: .uiBundle(identifier: "com.loopkit.CGMBLEKitUI", asset: "g6")
+        ),
+        // CGMBLEKit exports a G6CGMManager too, hence the module-qualified names.
+        CGMCatalogEntry(
+            .managed(G6SensorKit.G6CGMManager.self, id: "G6SensorKit"),
+            manufacturer: .dexcom,
+            name: "Dexcom G6 / ONE (native)",
+            icon: .uiBundle(identifier: "org.nightscout.G6SensorKitUI", asset: "G6Transmitter")
         ),
         CGMCatalogEntry(
             .managed(G7CGMManager.self, id: "G7CGMManager"),

@@ -62,3 +62,6 @@
 	path = SyaiKit
 	url = https://github.com/nightscout/SyaiKit
 	branch = trio-next-dev
+[submodule "G6SensorKit"]
+	path = G6SensorKit
+	url = https://github.com/trioneer-dev/G6SensorKit.git

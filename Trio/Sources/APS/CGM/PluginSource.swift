@@ -3,6 +3,7 @@ import CGMBLEKit
 import Combine
 import EversenseKit
 import Foundation
+import G6SensorKit
 import G7SensorKit
 import LibreLoop
 import LibreTransmitter
@@ -247,7 +248,7 @@ extension PluginSource: CGMManagerDelegate {
     private func currentSensorObservation() -> CGMSensorObservation {
         if let cgmTransmitterManager = cgmManager as? G7CGMManager {
             return cgmTransmitterManager.latestReading?.algorithmState.observation ?? .unavailable
-        } else if let cgmTransmitterManager = cgmManager as? G6CGMManager {
+        } else if let cgmTransmitterManager = cgmManager as? CGMBLEKit.G6CGMManager {
             return cgmTransmitterManager.latestReading?.state.observation ?? .unavailable
         }
         return .unavailable
@@ -276,11 +277,15 @@ extension PluginSource: CGMManagerDelegate {
                 sensorActivatedAt = latestReading?.activationDate
                 sensorStartDate = latestReading?.sessionStartDate
                 sensorTransmitterID = latestReading?.transmitterID
-            } else if let cgmTransmitterManager = cgmManager as? G6CGMManager {
+            } else if let cgmTransmitterManager = cgmManager as? CGMBLEKit.G6CGMManager {
                 let latestReading = cgmTransmitterManager.latestReading
                 sensorActivatedAt = latestReading?.activationDate
                 sensorStartDate = latestReading?.sessionStartDate
                 sensorTransmitterID = latestReading?.transmitterID
+            } else if let cgmTransmitterManager = cgmManager as? G6SensorKit.G6CGMManager {
+                sensorActivatedAt = cgmTransmitterManager.state.transmitterStartDate
+                sensorStartDate = cgmTransmitterManager.state.sensorStartDate
+                sensorTransmitterID = cgmTransmitterManager.state.transmitterID
             } else if let cgmTransmitterManager = cgmManager as? G7CGMManager {
                 sensorActivatedAt = cgmTransmitterManager.sensorActivatedAt
                 sensorStartDate = cgmTransmitterManager.sensorActivatedAt

@@ -5,6 +5,7 @@ import Combine
 import CoreData
 import EversenseKit
 import Foundation
+import G6SensorKit
 import G7SensorKit
 import LibreLoop
 import LibreTransmitter
@@ -915,7 +916,10 @@ extension Home {
                 }
                 return g7.sensorEndsAt ?? g7.sensorExpiresAt
 
-            case let g6 as G6CGMManager:
+            case let g6 as G6SensorKit.G6CGMManager:
+                return g6.state.sensorExpirationDate
+
+            case let g6 as CGMBLEKit.G6CGMManager:
                 return g6.latestReading?.sessionExpDate
 
             case let g5 as G5CGMManager:
@@ -956,7 +960,14 @@ extension Home {
 
                 return ends
 
-            case let g6 as G6CGMManager:
+            case let g6 as G6SensorKit.G6CGMManager:
+                guard let ends = g6.state.warmupEndDate, ends > Date.now else {
+                    return nil
+                }
+
+                return ends
+
+            case let g6 as CGMBLEKit.G6CGMManager:
                 guard let start = g6.latestReading?.sessionStartDate else {
                     return nil
                 }
