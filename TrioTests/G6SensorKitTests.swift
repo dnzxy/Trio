@@ -187,7 +187,7 @@ private enum G6Fixture {
         #expect(!shared.passiveModeEnabled)
     }
 
-    @Test("Re-read dates, readings, battery and local settings leave the export unchanged")  func stableAcrossLocalChanges() throws {
+    @Test("Re-read dates, readings, battery and local settings leave the export unchanged") func stableAcrossLocalChanges() throws {
         let baseline = NativeG6Manager(state: G6Fixture.state(anubis: true))
         let now = Date()
         let churned = NativeG6Manager(state: G6Fixture.state(anubis: true) {
@@ -540,7 +540,7 @@ private enum G6Fixture {
     @Test(
         "Other sensor states are not a failure",
         arguments: [UInt8(1), 2, 4, 6, 7, 8, 13, 14, 18, 99]
-    )  func notFailed(raw: UInt8) {
+    ) func notFailed(raw: UInt8) {
         let manager = NativeG6Manager(state: G6Fixture.state { $0.algorithmStateRawValue = raw })
         #expect(!manager.isInoperable)
         #expect(!manager.state.isSensorFailed)
