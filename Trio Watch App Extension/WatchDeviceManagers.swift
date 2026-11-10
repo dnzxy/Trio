@@ -84,9 +84,11 @@ extension G6CGMManager: WatchReadableCGM {
     }
 
     var watchSensorStateText: String? {
-        if state.isTransmitterExpired { return String(localized: "Transmitter expired") }
         if state.isSensorFailed { return String(localized: "Sensor failed") }
-        guard state.sensorStartDate != nil else { return nil }
+        // An expired transmitter still reads the session it is running.
+        guard state.sensorStartDate != nil else {
+            return state.isTransmitterExpired ? String(localized: "Transmitter expired") : nil
+        }
         if state.isInWarmup { return String(localized: "Sensor warmup") }
         if let expiration = state.sensorExpirationDate, expiration <= Date() { return String(localized: "Sensor expired") }
         return nil
