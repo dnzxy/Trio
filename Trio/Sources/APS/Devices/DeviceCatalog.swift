@@ -377,7 +377,6 @@ extension DeviceCatalog {
             name: "Dexcom G6 / ONE",
             icon: .uiBundle(identifier: "com.loopkit.CGMBLEKitUI", asset: "g6")
         ),
-        // CGMBLEKit exports a G6CGMManager too, hence the module-qualified names.
         CGMCatalogEntry(
             .managed(G6SensorKit.G6CGMManager.self, id: "G6SensorKit"),
             manufacturer: .dexcom,

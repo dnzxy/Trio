@@ -6,8 +6,7 @@ import Testing
 
 @testable import Trio
 
-// In the simulator every G6CGMManager starts G6SimulatedSession, which first touches state ~5 s after init
-// (it presents as an Anubis). Each test below finishes synchronously well before that.
+// The simulator's stand-in session first touches state ~5 s after init; every test finishes before that.
 
 private typealias NativeG6Manager = G6SensorKit.G6CGMManager
 
@@ -192,7 +191,6 @@ private enum G6Fixture {
         let baseline = NativeG6Manager(state: G6Fixture.state(anubis: true))
         let now = Date()
         let churned = NativeG6Manager(state: G6Fixture.state(anubis: true) {
-            // Re-reading the transmitter's clock can shift both dates by a second.
             $0.transmitterStartDate = now.addingTimeInterval(-.hours(24 * 20) + 1)
             $0.sensorStartDate = now.addingTimeInterval(-.hours(30) + 1)
             $0.latestReading = G6Fixture.reading(at: now)
@@ -230,14 +228,12 @@ private enum G6Fixture {
     }
 
     @Test("Switching passive mode changes the export when it moves the watch's slot") func changesWithPassiveMode() throws {
-        // Stock on the receiver slot: direct puts the watch on 0x02, passive leaves 0x02 to the Dexcom app.
         let stock = NativeG6Manager(state: G6Fixture.state(slot: .receiverOrPump))
         let direct = try G6Fixture.wireState(of: stock)
         stock.setPassiveModeEnabled(true)
         #expect(try direct != G6Fixture.wireState(of: stock))
         #expect(try G6Fixture.watchSlot(of: stock) == .receiverOrPump)
 
-        // Anubis on the extra slot: direct puts the watch on 0x01, passive frees 0x03 for it.
         let anubis = NativeG6Manager(state: G6Fixture.state(slot: .anubisExtra, anubis: true))
         let anubisDirect = try G6Fixture.wireState(of: anubis)
         anubis.setPassiveModeEnabled(true)
@@ -245,8 +241,6 @@ private enum G6Fixture {
         #expect(try G6Fixture.watchSlot(of: anubis) == .anubisExtra)
     }
 
-    /// The export carries the watch's slot, not the phone's mode, so a switch that leaves that slot where it was
-    /// gives the watch nothing to rebuild for.
     @Test("Switching passive mode on the default slot keeps the watch's slot and export") func passiveOnDefaultSlot() throws {
         let phone = NativeG6Manager(state: G6Fixture.state())
         let direct = try G6Fixture.wireState(of: phone)
@@ -431,7 +425,6 @@ private enum G6Fixture {
         ] {
             #expect(raw[key] == nil, "\(key) should be omitted when false or default")
         }
-        // Always written: their absence marks a CGMBLEKit state.
         #expect(raw["passiveModeEnabled"] as? Bool == false)
         #expect(raw["sensorLifeDays"] as? Int == TransmitterManagerState.defaultSensorLifeDays)
     }
@@ -482,7 +475,6 @@ private enum G6Fixture {
         #expect(!state.passiveModeEnabled)
         #expect(!state.isOnboarded)
 
-        // Either key alone marks a G6SensorKit state.
         let onlyLife: [String: Any] = ["transmitterID": G6Fixture.transmitterID, "sensorLifeDays": 10]
         #expect(G6CGMManagerState(rawValue: onlyLife)?.passiveModeEnabled == false)
         let onlyMode: [String: Any] = ["transmitterID": G6Fixture.transmitterID, "passiveModeEnabled": false]
@@ -565,7 +557,6 @@ private enum G6Fixture {
         })
         #expect(!stockRunning.isInoperable)
 
-        // The configured session length counts only on Anubis.
         let stockLong = NativeG6Manager(state: G6Fixture.state {
             $0.sensorLifeDays = 14
             $0.sensorStartDate = Date().addingTimeInterval(-11 * Self.day)
@@ -628,7 +619,6 @@ private enum G6Fixture {
         #expect(ObjectIdentifier(type) == ObjectIdentifier(NativeG6Manager.self))
         #expect(DeviceCatalog.cgmManagerEntries.contains { $0.id == "G6SensorKit" })
 
-        // CGMBLEKit's G6 keeps its own entry and type.
         let legacy = try #require(DeviceCatalog.cgmEntry(id: "DexG6Transmitter"))
         #expect(legacy.managerType.map { ObjectIdentifier($0) } != ObjectIdentifier(NativeG6Manager.self))
     }
@@ -653,7 +643,6 @@ private enum G6Fixture {
         #expect(app.deepLink == URL(string: "dexcomg6://"))
         #expect(CGMManagerAlertOwnership.providesOwnGlucoseAlerts(manager: passive, sourceType: .plugin))
 
-        // The ownership follows a live switch, not the mode the manager was created in.
         direct.setPassiveModeEnabled(true)
         #expect(CGMManagerAlertOwnership.owningApp(manager: direct, sourceType: .plugin) != nil)
         passive.setPassiveModeEnabled(false)

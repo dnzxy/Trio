@@ -12,7 +12,6 @@ import UIKit
 
 @Suite("Device Catalog Tests") struct DeviceCatalogTests {
     /// Persisted `pluginIdentifier` per CGM manager type; LoopKit only exposes it per instance.
-    /// Module-qualified: CGMBLEKit and G6SensorKit both name theirs `G6CGMManager`.
     private static let cgmPluginIdentifiers = [
         "LibreTransmitter.LibreTransmitterManagerV3": "LibreTransmitterManagerV3",
         "LibreLoop.LibreLoopCGMManager": "LibreLoopCGMManager",

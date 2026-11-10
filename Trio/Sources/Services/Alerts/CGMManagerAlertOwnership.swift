@@ -33,8 +33,7 @@ enum CGMManagerAlertOwnership {
         case is CGMBLEKit.G6CGMManager:
             return OwningApp(name: "Dexcom G6 / One", deepLink: URL(string: "dexcomg6://"))
         case let manager as G6SensorKit.G6CGMManager:
-            // Only passive mode has a Dexcom app behind it; direct mode
-            // requires that app to be gone, so nothing else alerts.
+            // Direct mode requires the Dexcom app gone, so Trio alerts alone.
             guard manager.state.passiveModeEnabled else { return nil }
             return OwningApp(name: "Dexcom G6 / One", deepLink: URL(string: "dexcomg6://"))
         case let manager as G7CGMManager:
